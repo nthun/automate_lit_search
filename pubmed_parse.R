@@ -28,19 +28,22 @@ pubmed_records <-
 pwalk( # pwalk takes any number of parameters (..1, ..2, etc.) and iterates the function, but only for the side effects (in this case, creating files)
     list(pubmed_records$xml, pubmed_records$filename), # Define the parameters
     ~ table_articles_byAuth(
-        ..1, max_chars = 3000, included_authors = "all",
+        ..1, # This parameter tells what to parse
+        max_chars = 3000, # The maximum number of characters to parse from the abstract. I would like to have the full abstracts, so 3000 should be enough.
+        included_authors = "all", # Get all authors in different rows
         dest_file = str_replace_all(..2, "xml", "csv") # save all to a different library
     )
 )
 
 # Prepare the final dataset from the saved csv-s
+# The reason for this is to put all data together, and also to collapse author names. So this way, each row will correspond to one publication, while the author names are preserved
 pubmed_articles <-
     tibble(filename = paste0("pubmed_hits_csv/" ,list.files(path = "pubmed_hits_csv/", ".csv"))) %>% # Read all csv files in subdir into a data frame
     mutate(df = map(filename, read_csv, na = c("","NA"))) %>% # Read all csvs into a nested dataframe 
     unnest(df) %>% # Unnest all data and bind by rows
     mutate(authors = paste(lastname, firstname, sep = ", ")) %>% # Make a single name var
     group_by(pmid, doi, title, abstract, year, month, day, journal, jabbrv) %>%
-    summarise(authors = paste(authors, collapse = "; ")) %>% # Collaps author names
+    summarise(authors = paste(authors, collapse = "; ")) %>% # Collapse author names
     ungroup() %>% 
     drop_na(pmid) # Drop all records without pmid (it is always an empty record in pubmed)
 
