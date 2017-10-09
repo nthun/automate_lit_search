@@ -1,4 +1,5 @@
 library(tidyverse)
+library(magrittr)
 devtools::install_github("nthun/easyPubMed") # I fixed a bug in the original code, so now this is from my own github repo
 library(easyPubMed)
 library(stringr)
@@ -10,6 +11,20 @@ query_string <- "
 (problem Internet Use) OR (Problematic Internet Use) OR (Internet addiction) OR (Compulsive internet use) OR (pathological internet use) OR (excessive internet use) OR (internet dependence)OR  
 (Computer game addiction) OR (Problem gaming) OR (Problematic Gaming) OR (Gaming addiction) OR (Gaming disorder) OR (Video game addiction) OR (Problematic video gaming) OR (Problematic online gaming) OR (Online gaming addiction) OR (pathological gaming) OR (excessive gaming) OR (videogame dependence)" 
 
+## SETUP FOLDER STRUCTURE TO RECEIVE DATA
+# Create a xml directory if not exists
+if (
+    list.dirs(recursive = F) %>% 
+    str_detect(., "pubmed_hits_xml") %>% 
+    any(. == TRUE) %>% 
+    not()) {dir.create("pubmed_hits_xml")}
+
+# Create a csv directory if not exists    
+if (
+    list.dirs(recursive = F) %>% 
+    str_detect(., "pubmed_hits_csv") %>% 
+    any(. == TRUE) %>% 
+    not()) {dir.create("pubmed_hits_csv")}
 
 ## BATCH DOWNLOAD ALL HITS IN XML FORMAT AND SAVE THEM TO DISK IN BATCHES
 # This can take a _very_long time to run, but the results are saved locally, so it only has to be done once
