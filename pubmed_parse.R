@@ -1,6 +1,6 @@
 library(tidyverse)
 library(magrittr)
-devtools::install_github("nthun/easyPubMed") # I fixed a bug in the original code, so now this is from my own github repo
+# devtools::install_github("nthun/easyPubMed") # I fixed a bug in the original code, so now this is from my own github repo
 library(easyPubMed)
 library(stringr)
 library(openxlsx)
@@ -60,8 +60,12 @@ pubmed_articles <-
     group_by(pmid, doi, title, abstract, year, month, day, journal, jabbrv) %>%
     summarise(authors = paste(authors, collapse = "; ")) %>% # Collapse author names
     ungroup() %>% 
-    drop_na(pmid) # Drop all records without pmid (it is always an empty record in pubmed)
+    drop_na(pmid) %>%  # Drop all records without pmid (it is always an empty record in pubmed)
+    filter(!duplicated(doi) & !duplicated(pmid) & !duplicated(title)) # Remove duplicates by doi, pmid, and title
 
 # Write result as an xlsx
 write.xlsx(pubmed_articles, "all_pubmed_hits.xlsx")
+
+hits <- read.xlsx("all_pubmed_hits.xlsx")
+
 
