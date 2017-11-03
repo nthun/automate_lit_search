@@ -55,7 +55,7 @@ pubmed_articles <-
     mutate(df = map(filename, read_csv, na = c("","NA"))) %>% # Read all csvs into a nested dataframe 
     unnest(df) %>% # Unnest all data and bind by rows
     mutate(authors = paste(lastname, firstname, sep = ", ")) %>% # Make a single name var
-    group_by(pmid, doi, title, abstract, year, month, day, journal, jabbrv) %>%
+    group_by(pmid, doi, title, abstract, year, month, day, journal) %>%
     summarise(authors = paste(authors, collapse = "; ")) %>% # Collapse author names
     ungroup() %>% 
     drop_na(pmid) %>%  # Drop all records without pmid (it is always an empty record in pubmed)
