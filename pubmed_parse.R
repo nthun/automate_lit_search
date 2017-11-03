@@ -7,9 +7,7 @@ library(openxlsx)
 # source("table_articles_byAuth.R") # Bugfix of the original function from easyPubMed, if the github repo install would not work, try this.
 
 # Define the query string. You should put together the query in the PubMed site, and just copy paste it here if unsure about the syntax
-query_string <- "
-(problem Internet Use) OR (Problematic Internet Use) OR (Internet addiction) OR (Compulsive internet use) OR (pathological internet use) OR (excessive internet use) OR (internet dependence)OR  
-(Computer game addiction) OR (Problem gaming) OR (Problematic Gaming) OR (Gaming addiction) OR (Gaming disorder) OR (Video game addiction) OR (Problematic video gaming) OR (Problematic online gaming) OR (Online gaming addiction) OR (pathological gaming) OR (excessive gaming) OR (videogame dependence)" 
+query_string <- read_lines("query_string.txt")
 
 ## SETUP FOLDER STRUCTURE TO RECEIVE DATA
 # Create a xml directory if not exists
