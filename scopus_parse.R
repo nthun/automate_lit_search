@@ -17,7 +17,7 @@ items_per_page <- 25 # This is the maximum that API can handle
 http <-
     paste0(
         "http://api.elsevier.com/content/search/scopus",
-        "?start=",current_start,
+        "?start=", 0,
         "&count=25&query=", URLencode(query_string, reserved = TRUE),
         "&view=COMPLETE", # Complete search returns full author list and abstract
         "&apiKey=", api_key
@@ -29,7 +29,7 @@ page_content <- newpage %>% content()
 hits <- page_content$`search-results`$`opensearch:totalResults` %>% as.numeric() # All hits
 
 # Collect all unique results
-for (current_start in seq(0, hits, items_per_page)) {
+for (current_start in seq(items_per_page, hits, items_per_page)) {
     newpage <-
         httr::GET(
             paste0(
@@ -44,12 +44,9 @@ for (current_start in seq(0, hits, items_per_page)) {
     page_content %<>% append(content(newpage))
     print(
         paste0(
-            "Collecting data: ",
-            current_start,
-            " to ",
-            current_start + items_per_page,
-            " of ",
-            hits
+            "Collecting data: ", current_start,
+            " to ", current_start + items_per_page,
+            " of ", hits
         )
     )
 }
@@ -59,9 +56,9 @@ simple_contents <-
     page_content %>% 
     map(., "entry") %>%
     flatten()
-    
+
 # Parse the contents into a tibble
-df <- 
+scopus_articles <- 
     tibble(
         doi = map(simple_contents, "prism:doi"),
         eid = map_chr(simple_contents, "eid"),
@@ -69,6 +66,8 @@ df <-
         pmid = map(simple_contents, "pubmed-id"),
         title = map_chr(simple_contents, "dc:title"),
         journal = map_chr(simple_contents, "prism:publicationName"),
+        authors = map(simple_contents, "author") %>% 
+            map_chr(~map_chr(.x, "authname") %>% paste(collapse = "; ")),
         date = map_chr(simple_contents, "prism:coverDate"),
         year = str_replace(date, "(^\\d{4})-.*","\\1") %>% as.numeric(),
         month = str_replace(date, "^.*-(\\d{2})-.*$","\\1") %>% as.numeric(),
@@ -79,18 +78,7 @@ df <-
     mutate(
         doi = ifelse(is_null(doi), NA_character_, as.character(doi)),
         pmid = ifelse(is_null(pmid), NA_character_, as.character(pmid))
-        )
-
-temp <- 
-    map(simple_contents, "author")
-    map(., "authname")
-
-aname <- map(temp[[1]], "authname") %>% unlist()
-
-pluck()
-
-paste(aname, collapse = "; ")
-
-# TODO: Get full author list
+        ) %>% 
+    select(-date)
 
 
