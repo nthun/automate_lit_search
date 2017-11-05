@@ -53,7 +53,8 @@ pubmed_articles <-
     summarise(authors = paste(authors, collapse = "; ")) %>% # Collapse author names
     ungroup() %>% 
     drop_na(pmid) %>%  # Drop all records without pmid (it is always an empty record in pubmed)
-    filter(!duplicated(pmid)) # Remove duplicates by doi, pmid, and title
+    filter(!duplicated(pmid)) %>% # Remove duplicates by doi, pmid, and title
+    mutate(source = "psycInfo")
 
 # Write result as an xlsx
 write.xlsx(pubmed_articles, "all_pubmed_hits.xlsx")

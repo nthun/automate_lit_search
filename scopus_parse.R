@@ -64,6 +64,7 @@ simple_contents <-
 # Parse the contents into a tibble
 scopus_articles <- 
     tibble(
+        source = "scopus",
         doi = map(simple_contents, "prism:doi"),
         eid = map_chr(simple_contents, "eid"),
         sid = map_chr(simple_contents, "dc:identifier") %>% str_replace("SCOPUS_ID:",""),
@@ -71,9 +72,10 @@ scopus_articles <-
         title = map_chr(simple_contents, "dc:title"),
         journal = map_chr(simple_contents, "prism:publicationName"),
         authors = map(simple_contents, "author") %>% # Select the author element containing all authors
-                    map_chr(~map_chr(.x, "authname") %>% # Select the authname elements
-                    paste(collapse = "; ") %>%  # Make it one string
-                    str_replace_all("[.]","")), # Replace dots to match pubmed dataset
+                    map_chr(
+                        ~map_chr(.x, "authname") %>% # Select the authname elements
+                        paste(collapse = "; ") %>%  # Make it one string
+                        str_replace_all("[.]","")), # Replace dots to match pubmed dataset
         date = map_chr(simple_contents, "prism:coverDate"),
         year = str_replace(date, "(^\\d{4})-.*","\\1") %>% as.numeric(),
         month = str_replace(date, "^.*-(\\d{2})-.*$","\\1") %>% as.numeric(),
