@@ -7,29 +7,23 @@ library(openxlsx)
 # source("table_articles_byAuth.R") # Bugfix of the original function from easyPubMed, if the github repo install would not work, try this.
 
 # Define the query string. You should put together the query in the PubMed site, and just copy paste it here if unsure about the syntax
-query_string <- read_lines("query_string.txt")
+query_string <- read_lines("query_string_2.txt")
+file_postfix <- "internet_addiction_pubmed_"
+
 
 ## SETUP FOLDER STRUCTURE TO RECEIVE DATA
 # Create a xml directory if not exists
-if (
-    list.dirs(recursive = F) %>% 
-    str_detect(., "pubmed_hits_xml") %>% 
-    any(. == TRUE) %>% 
-    not()) {dir.create("pubmed_hits_xml")}
+if (!dir.exists("pubmed_hits_xml")) dir.create("pubmed_hits_xml")
 
 # Create a csv directory if not exists    
-if (
-    list.dirs(recursive = F) %>% 
-    str_detect(., "pubmed_hits_csv") %>% 
-    any(. == TRUE) %>% 
-    not()) {dir.create("pubmed_hits_csv")}
+if (!dir.exists("pubmed_hits_csv")) dir.create("pubmed_hits_csv")
 
 ## BATCH DOWNLOAD ALL HITS IN XML FORMAT AND SAVE THEM TO DISK IN BATCHES
 # This can take a _very_long time to run, but the results are saved locally, so it only has to be done once
-output <- batch_pubmed_download(pubmed_query_string = query_string,
+batch_pubmed_download(pubmed_query_string = query_string,
                                format = "xml",
                                batch_size = 150,
-                               dest_file_prefix = "pubmed_hits_xml/internet_addiction_pubmed_")
+                               dest_file_prefix = paste0("pubmed_hits_xml/", file_postfix))
 
 pubmed_records <-
     tibble(filename = paste0("pubmed_hits_xml/" ,list.files(path = "pubmed_hits_xml/", ".xml") # get all xml files from the subdir
